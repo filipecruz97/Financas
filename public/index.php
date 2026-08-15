@@ -1,5 +1,8 @@
 <?php 
 
+require "../config/database.php";
+
+
 require "../src/funcoes.php";
 ?>
 
@@ -12,8 +15,8 @@ require "../src/funcoes.php";
     <br>
     <label> Tipo: </label>
     <select name= "tipo">
-        <option value= "Despesa"> Despesa </option>
-        <option value= "Receita"> Receita </option>
+        <option value= "expense"> Despesa </option>
+        <option value= "income"> Receita </option>
     </select>
     <br>
     <button type= "submit"> Salvar </button>
@@ -30,7 +33,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($descricao === "" || $valor === "" || !is_numeric($valor)) {
         echo "<p style='color:red'>Preencha todos os campos corretamente.</p>";
     } else {
+
+    $stmt = $pdo->prepare("INSERT INTO transactions (description, amount, type, date, category_id, user_id) VALUES (:description, :amount, :type, :date, NULL, NULL)");
+    $stmt->execute([
+        "description" => $descricao,
+        "amount" => $valor,
+        "type" => $tipo,
+        "date" => date("Y-m-d")
+    ]);
+
         echo "<hr>";
-        echo "Você cadastrou: " . $descricao . " - " . formatarMoeda($valor) . " (" . $tipo . ")";
+        echo "Transação salva com sucesso no banco! ID: " . $pdo->lastInsertId(); 
     }
 }

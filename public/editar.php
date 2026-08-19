@@ -1,6 +1,7 @@
 <?php
 require "../config/database.php";
 require "../src/funcoes.php";
+require "../src/transacoes.php";
 
 $id = $_GET["id"] ?? null;
 
@@ -18,23 +19,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($descricao === "" || $valor === "" || !is_numeric($valor)) {
         $erro = "Preencha todos os campos corretamente.";
     } else {
-        $stmt = $pdo->prepare("UPDATE transactions SET description = :description, amount = :amount, type = :type WHERE id = :id");
-        $stmt->execute([
-            "description" => $descricao,
-            "amount" => $valor,
-            "type" => $tipo,
-            "id" => $id
-        ]);
-
+      atualizarTransacao($pdo, $id, $descricao, $valor, $tipo);
         header("Location: index.php");
         exit;
     }
 }
 
 // Busca os dados atuais da transação, pra preencher o formulário
-$stmt = $pdo->prepare("SELECT * FROM transactions WHERE id = :id");
-$stmt->execute(["id" => $id]);
-$transaction = $stmt->fetch(PDO::FETCH_ASSOC);
+$transaction = buscarTransacaoPorId($pdo, $id);
 
 if (!$transaction) {
     header("Location: index.php");
@@ -44,7 +36,9 @@ if (!$transaction) {
 
 <h2>Editar transação</h2>
 
-<?php if (isset($erro)): ?>
+<?php 
+
+        if (isset($erro)): ?>
     <p style="color:red"><?= $erro ?></p>
 <?php endif; ?>
 

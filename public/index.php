@@ -2,6 +2,7 @@
 
 require "../config/database.php";
 require "../src/funcoes.php";
+require "../src/transacoes.php";
 ?>
 
 <form method="POST" action="">
@@ -31,16 +32,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo "<p style='color:red'>Preencha todos os campos corretamente.</p>";
     } else {
 
-        $stmt = $pdo->prepare("INSERT INTO transactions (description, amount, type, date, category_id, user_id) VALUES (:description, :amount, :type, :date, NULL, NULL)");
-        $stmt->execute([
-            "description" => $descricao,
-            "amount" => $valor,
-            "type" => $tipo,
-            "date" => date("Y-m-d")
-        ]);
+        $novoId = criarTransacao($pdo, $descricao, $valor, $tipo);
 
-        echo "<hr>";
-        echo "Transação salva com sucesso no banco! ID: " . $pdo->lastInsertId(); 
+echo "<hr>";
+echo "Transação salva com sucesso no banco! ID: " . $novoId;
     }
 }
 ?>
@@ -48,8 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <h2>Transações cadastradas</h2>
 
 <?php
-$stmt = $pdo->query("SELECT * FROM transactions ORDER BY date DESC");
-$transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$transactions = listarTransacoes($pdo);
 ?>
 
 <table border="1" cellpadding="8">

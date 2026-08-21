@@ -1,4 +1,10 @@
 <?php 
+session_start();
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit;
+}
+
 
 require "../config/database.php";
 require "../src/funcoes.php";
@@ -19,6 +25,7 @@ require "../src/transacoes.php";
     </select>
     <br>
     <button type="submit"> Salvar </button>
+    <p>Olá, <?= htmlspecialchars($_SESSION["user_name"]) ?>! <a href="logout.php">Sair</a></p>
 </form>
 
 <?php 

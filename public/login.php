@@ -1,4 +1,5 @@
 <?php
+session_start();
 require "../config/database.php";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -10,7 +11,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($senha, $user["password"])) {
-        echo "Login válido! Bem-vindo, " . htmlspecialchars($user["name"]);
+        $_SESSION["user_id"] = $user["id"];
+        $_SESSION["user_name"] = $user["name"];
+
+        header("Location: index.php");
+        exit;
+        
     } else {
         $erro = "Email ou senha incorretos.";
     }

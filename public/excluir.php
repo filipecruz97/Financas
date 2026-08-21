@@ -1,4 +1,11 @@
 <?php
+session_start();
+
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit;
+}
+
 require "../config/database.php";
 require "../src/transacoes.php";
 

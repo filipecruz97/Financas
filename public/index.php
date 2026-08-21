@@ -1,15 +1,17 @@
 <?php 
 session_start();
+
 if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
     exit;
 }
 
-
 require "../config/database.php";
 require "../src/funcoes.php";
 require "../src/transacoes.php";
 ?>
+
+<p>Olá, <?= htmlspecialchars($_SESSION["user_name"]) ?>! <a href="logout.php">Sair</a></p>
 
 <form method="POST" action="">
     <label> Descrição: </label>
@@ -24,8 +26,18 @@ require "../src/transacoes.php";
         <option value="income"> Receita </option>
     </select>
     <br>
+    <label>Categoria:</label>
+    <select name="categoria_id">
+        <?php
+        $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
+        $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($categorias as $c):
+        ?>
+            <option value="<?= $c["id"] ?>"><?= htmlspecialchars($c["name"]) ?></option>
+        <?php endforeach; ?>
+    </select>
+    <br>
     <button type="submit"> Salvar </button>
-    <p>Olá, <?= htmlspecialchars($_SESSION["user_name"]) ?>! <a href="logout.php">Sair</a></p>
 </form>
 
 <?php 
@@ -34,15 +46,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $descricao = trim($_POST["descricao"]);
     $valor = $_POST["valor"];
     $tipo = $_POST["tipo"];
+    $categoria_id = $_POST["categoria_id"];
 
     if ($descricao === "" || $valor === "" || !is_numeric($valor)) {
         echo "<p style='color:red'>Preencha todos os campos corretamente.</p>";
     } else {
 
-        $novoId = criarTransacao($pdo, $descricao, $valor, $tipo);
+        $novoId = criarTransacao($pdo, $descricao, $valor, $tipo, $categoria_id, $_SESSION["user_id"]);
 
-echo "<hr>";
-echo "Transação salva com sucesso no banco! ID: " . $novoId;
+        echo "<hr>";
+        echo "Transação salva com sucesso no banco! ID: " . $novoId;
     }
 }
 ?>
@@ -58,6 +71,7 @@ $transactions = listarTransacoes($pdo);
         <th>Descrição</th>
         <th>Valor</th>
         <th>Tipo</th>
+        <th>Categoria</th>
         <th>Data</th>
         <th>Ações</th>
     </tr>
@@ -66,6 +80,7 @@ $transactions = listarTransacoes($pdo);
             <td><?= htmlspecialchars($t["description"]) ?></td>
             <td><?= formatarMoeda($t["amount"]) ?></td>
             <td><?= $t["type"] === "expense" ? "🔴 Despesa" : "🟢 Receita" ?></td>
+            <td><?= htmlspecialchars($t["category_name"] ?? "-") ?></td>
             <td><?= date("d/m/Y", strtotime($t["date"])) ?></td>
             <td>
                 <a href="editar.php?id=<?= $t["id"] ?>">✏️ Editar</a>

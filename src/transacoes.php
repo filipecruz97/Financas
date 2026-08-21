@@ -1,17 +1,25 @@
 <?php
 
 function listarTransacoes($pdo) {
-    $stmt = $pdo->query("SELECT * FROM transactions ORDER BY date DESC");
+    $stmt = $pdo->query("
+        SELECT transactions.*, categories.name AS category_name
+        FROM transactions
+        LEFT JOIN categories ON transactions.category_id = categories.id
+        ORDER BY transactions.date DESC
+    ");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
 }
 
-function criarTransacao($pdo, $descricao, $valor, $tipo) {
-    $stmt = $pdo->prepare("INSERT INTO transactions (description, amount, type, date, category_id, user_id) VALUES (:description, :amount, :type, :date, NULL, NULL)");
+function criarTransacao($pdo, $descricao, $valor, $tipo, $categoria_id, $usuario_id) {
+    $stmt = $pdo->prepare("INSERT INTO transactions (description, amount, type, date, category_id, user_id) VALUES (:description, :amount, :type, :date, :category_id, :user_id)");
     $stmt->execute([
         "description" => $descricao,
         "amount" => $valor,
         "type" => $tipo,
-        "date" => date("Y-m-d")
+        "date" => date("Y-m-d"),
+        "category_id" => $categoria_id,
+        "user_id" => $usuario_id
     ]);
     return $pdo->lastInsertId();
 }

@@ -45,11 +45,12 @@ function excluirTransacao($pdo, $id) {
     $stmt->execute(["id" => $id]);
 }
 
-function listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categoriaId) {
+function listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categoriaId, $userId) {
     $sql = "
-        SELECT transactions.*, categories.name AS category_name
+        SELECT transactions.*, categories.name AS category_name, users.name AS user_name
         FROM transactions
         LEFT JOIN categories ON transactions.category_id = categories.id
+        LEFT JOIN users ON transactions.user_id = users.id
         WHERE 1=1
     ";
     $params = [];
@@ -67,6 +68,11 @@ function listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categoriaId) {
     if (!empty($categoriaId)) {
         $sql .= " AND transactions.category_id = :categoria_id";
         $params["categoria_id"] = $categoriaId;
+    }
+
+    if (!empty($userId)) {
+        $sql .= " AND transactions.user_id = :user_id";
+        $params["user_id"] = $userId;
     }
 
     $sql .= " ORDER BY transactions.date DESC";

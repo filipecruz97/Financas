@@ -9,6 +9,12 @@ if (!isset($_SESSION["user_id"])) {
 require "../config/database.php";
 require "../src/funcoes.php";
 require "../src/transacoes.php";
+
+$stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
+$categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmtUsuarios = $pdo->query("SELECT * FROM users ORDER BY name");
+$usuarios = $stmtUsuarios->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <p>Olá, <?= htmlspecialchars($_SESSION["user_name"]) ?>! <a href="logout.php">Sair</a></p>
@@ -28,11 +34,7 @@ require "../src/transacoes.php";
     <br>
     <label>Categoria:</label>
     <select name="categoria_id">
-        <?php
-        $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
-        $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        foreach ($categorias as $c):
-        ?>
+        <?php foreach ($categorias as $c): ?>
             <option value="<?= $c["id"] ?>"><?= htmlspecialchars($c["name"]) ?></option>
         <?php endforeach; ?>
     </select>
@@ -78,20 +80,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <?php endforeach; ?>
     </select>
 
+    <label>Quem lançou:</label>
+    <select name="user_id">
+        <option value="">Todos</option>
+        <?php foreach ($usuarios as $u): ?>
+            <option value="<?= $u["id"] ?>" <?= (isset($_GET['user_id']) && $_GET['user_id'] == $u["id"]) ? "selected" : "" ?>>
+                <?= htmlspecialchars($u["name"]) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
     <button type="submit">Filtrar</button>
     <a href="index.php">Limpar filtro</a>
 </form>
-
-<h2>Transações cadastradas</h2>
 
 <?php
 $dataInicio = $_GET['data_inicio'] ?? '';
 $dataFim = $_GET['data_fim'] ?? '';
 $categoriaFiltro = $_GET['categoria_id'] ?? '';
+$userFiltro = $_GET['user_id'] ?? '';
 
-$transactions = listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categoriaFiltro);
+$transactions = listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categoriaFiltro, $userFiltro);
 
+$totalReceitas = 0;
+$totalDespesas = 0;
+
+foreach ($transactions as $t) {
+    if ($t["type"] === "income") {
+        $totalReceitas += $t["amount"];
+    } else {
+        $totalDespesas += $t["amount"];
+    }
+}
+
+$saldo = $totalReceitas - $totalDespesas;
 ?>
+
+<h3>Resumo</h3>
+<p>🟢 Total receitas: <?= formatarMoeda($totalReceitas) ?></p>
+<p>🔴 Total despesas: <?= formatarMoeda($totalDespesas) ?></p>
+<p><strong>Saldo: <?= formatarMoeda($saldo) ?></strong></p>
+
+<h2>Transações cadastradas</h2>
 
 <table border="1" cellpadding="8">
     <tr>
@@ -99,6 +129,7 @@ $transactions = listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categori
         <th>Valor</th>
         <th>Tipo</th>
         <th>Categoria</th>
+        <th>Lançado por</th>
         <th>Data</th>
         <th>Ações</th>
     </tr>
@@ -108,6 +139,7 @@ $transactions = listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categori
             <td><?= formatarMoeda($t["amount"]) ?></td>
             <td><?= $t["type"] === "expense" ? "🔴 Despesa" : "🟢 Receita" ?></td>
             <td><?= htmlspecialchars($t["category_name"] ?? "-") ?></td>
+            <td><?= htmlspecialchars($t["user_name"] ?? "-") ?></td>
             <td><?= date("d/m/Y", strtotime($t["date"])) ?></td>
             <td>
                 <a href="editar.php?id=<?= $t["id"] ?>">✏️ Editar</a>

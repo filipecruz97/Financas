@@ -23,11 +23,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 ?>
 
+
 <h2>Login</h2>
 
-<?php if (isset($erro)): ?>
-    <p style="color:red"><?= $erro ?></p>
+
+<?php if (isset($_GET["erro"]) && $_GET["erro"] === "sessao"): ?>
+    <p style="color:orange">Sua sessão expirou ou você precisa fazer login para continuar.</p>
 <?php endif; ?>
+
+
 
 <form method="POST" action="">
     <label>Email:</label>

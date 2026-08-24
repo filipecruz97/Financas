@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
+header("Location: login.php?erro=sessao");
     exit;
 }
 
@@ -18,7 +18,7 @@ $usuarios = $stmtUsuarios->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <p>Olá, <?= htmlspecialchars($_SESSION["user_name"]) ?>! <a href="logout.php">Sair</a></p>
-
+<link rel="stylesheet" href="style.css">
 <form method="POST" action="">
     <label> Descrição: </label>
     <input type="text" name="descricao">
@@ -50,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $tipo = $_POST["tipo"];
     $categoria_id = $_POST["categoria_id"];
 
-    if ($descricao === "" || $valor === "" || !is_numeric($valor)) {
+    if ($descricao === "" || $valor === "" || !is_numeric($valor) || $valor <= 0) {
         echo "<p style='color:red'>Preencha todos os campos corretamente.</p>";
     } else {
 

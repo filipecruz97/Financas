@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
+   header("Location: login.php?erro=sessao");
     exit;
 }
 
@@ -28,8 +28,10 @@ $gastos = gastosPorCategoria($pdo);
 // Preparar os dados para o gráfico em formato JSON
 $labels = array_column($gastos, "category_name");
 $valores = array_column($gastos, "total");
+
 ?>
 
+<link rel="stylesheet" href="style.css">
 <h1>Dashboard</h1>
 <p>Olá, <?= htmlspecialchars($_SESSION["user_name"]) ?>! <a href="logout.php">Sair</a></p>
 <p><a href="index.php">Ver todas as transações</a></p>

@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
+    header("Location: login.php?erro=sessao");
     exit;
 }
 
@@ -24,13 +24,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         criarOuAtualizarMeta($pdo, $categoriaId, $valor, $mesAtual, $anoAtual);
     }
 
-    header("Location: metas.php");
+   header("Location: login.php?erro=sessao");
     exit;
 }
 
 $metas = listarMetasComGasto($pdo, $mesAtual, $anoAtual);
 ?>
-
+<link rel="stylesheet" href="style.css">
 <h1>Metas do mês</h1>
 <p><a href="dashboard.php">← Voltar ao Dashboard</a></p>
 

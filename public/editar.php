@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
+    header("Location: login.php?erro=sessao");
     exit;
 }
 
@@ -14,7 +14,7 @@ require "../src/transacoes.php";
 $id = $_GET["id"] ?? null;
 
 if (!$id || !is_numeric($id)) {
-    header("Location: index.php");
+    header("Location: login.php?erro=sessao");
     exit;
 }
 
@@ -24,11 +24,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $valor = $_POST["valor"];
     $tipo = $_POST["tipo"];
 
-    if ($descricao === "" || $valor === "" || !is_numeric($valor)) {
+   if ($descricao === "" || $valor === "" || !is_numeric($valor) || $valor <= 0) {
         $erro = "Preencha todos os campos corretamente.";
     } else {
       atualizarTransacao($pdo, $id, $descricao, $valor, $tipo);
-        header("Location: index.php");
+        header("Location: login.php?erro=sessao");
         exit;
     }
 }
@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 $transaction = buscarTransacaoPorId($pdo, $id);
 
 if (!$transaction) {
-    header("Location: index.php");
+  header("Location: login.php?erro=sessao");
     exit;
 }
 ?>
@@ -50,6 +50,8 @@ if (!$transaction) {
     <p style="color:red"><?= $erro ?></p>
 <?php endif; ?>
 
+
+<link rel="stylesheet" href="style.css">
 <form method="POST" action="">
     <label>Descrição:</label>
     <input type="text" name="descricao" value="<?= htmlspecialchars($transaction["description"]) ?>">

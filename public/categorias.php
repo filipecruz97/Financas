@@ -16,14 +16,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->execute(["name" => $nome]);
     }
 
-    header("Location: categorias.php");
+    header("Location: login.php?erro=sessao");
     exit;
 }
 
 $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
 $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
+<link rel="stylesheet" href="style.css">
 <h2>Categorias</h2>
 
 <form method="POST" action="">

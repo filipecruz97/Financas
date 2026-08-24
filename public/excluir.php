@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
+    header("Location: login.php?erro=sessao");
     exit;
 }
 
@@ -14,5 +14,5 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
     excluirTransacao($pdo, $id);
 }
 
-header("Location: index.php");
+header("Location: login.php?erro=sessao");
 exit;

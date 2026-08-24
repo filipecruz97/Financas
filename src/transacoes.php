@@ -81,3 +81,25 @@ function listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categoriaId, $u
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+function gastosPorCategoria($pdo, $userId = null) {
+    $sql = "
+        SELECT categories.name AS category_name, SUM(transactions.amount) AS total
+        FROM transactions
+        LEFT JOIN categories ON transactions.category_id = categories.id
+        WHERE transactions.type = 'expense'
+        AND transactions.category_id IS NOT NULL
+    ";
+    $params = [];
+
+    if (!empty($userId)) {
+        $sql .= " AND transactions.user_id = :user_id";
+        $params["user_id"] = $userId;
+    }
+
+    $sql .= " GROUP BY categories.name";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}

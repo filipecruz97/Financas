@@ -44,3 +44,34 @@ function excluirTransacao($pdo, $id) {
     $stmt = $pdo->prepare("DELETE FROM transactions WHERE id = :id");
     $stmt->execute(["id" => $id]);
 }
+
+function listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categoriaId) {
+    $sql = "
+        SELECT transactions.*, categories.name AS category_name
+        FROM transactions
+        LEFT JOIN categories ON transactions.category_id = categories.id
+        WHERE 1=1
+    ";
+    $params = [];
+
+    if (!empty($dataInicio)) {
+        $sql .= " AND transactions.date >= :data_inicio";
+        $params["data_inicio"] = $dataInicio;
+    }
+
+    if (!empty($dataFim)) {
+        $sql .= " AND transactions.date <= :data_fim";
+        $params["data_fim"] = $dataFim;
+    }
+
+    if (!empty($categoriaId)) {
+        $sql .= " AND transactions.category_id = :categoria_id";
+        $params["categoria_id"] = $categoriaId;
+    }
+
+    $sql .= " ORDER BY transactions.date DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}

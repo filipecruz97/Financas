@@ -60,10 +60,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 ?>
 
+<h3>Filtrar transações</h3>
+<form method="GET" action="">
+    <label>De:</label>
+    <input type="date" name="data_inicio" value="<?= $_GET['data_inicio'] ?? '' ?>">
+
+    <label>Até:</label>
+    <input type="date" name="data_fim" value="<?= $_GET['data_fim'] ?? '' ?>">
+
+    <label>Categoria:</label>
+    <select name="categoria_id">
+        <option value="">Todas</option>
+        <?php foreach ($categorias as $c): ?>
+            <option value="<?= $c["id"] ?>" <?= (isset($_GET['categoria_id']) && $_GET['categoria_id'] == $c["id"]) ? "selected" : "" ?>>
+                <?= htmlspecialchars($c["name"]) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
+    <button type="submit">Filtrar</button>
+    <a href="index.php">Limpar filtro</a>
+</form>
+
 <h2>Transações cadastradas</h2>
 
 <?php
-$transactions = listarTransacoes($pdo);
+$dataInicio = $_GET['data_inicio'] ?? '';
+$dataFim = $_GET['data_fim'] ?? '';
+$categoriaFiltro = $_GET['categoria_id'] ?? '';
+
+$transactions = listarTransacoesFiltradas($pdo, $dataInicio, $dataFim, $categoriaFiltro);
+
 ?>
 
 <table border="1" cellpadding="8">
